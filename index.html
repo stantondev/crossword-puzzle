@@ -2,65 +2,184 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Fantasy Crossword Puzzle</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Neon Rift Crossword</title>
     <style>
-        /* Basic styling for the crossword grid */
+        :root {
+            --bg: #060913;
+            --panel: #0f1630;
+            --ink: #e9f4ff;
+            --accent: #6bf3ff;
+            --accent-2: #ff6bd6;
+            --good: #63ffa3;
+            --bad: #ff6b83;
+            --block: #020409;
+        }
+
+        * { box-sizing: border-box; }
+
         body {
-            font-family: Arial, sans-serif;
-            margin: 20px;
+            margin: 0;
+            min-height: 100vh;
+            font-family: Inter, Segoe UI, system-ui, sans-serif;
+            color: var(--ink);
+            background: radial-gradient(circle at 20% 15%, #1a2a5f 0%, #0c1230 30%, var(--bg) 65%);
+            display: grid;
+            place-items: center;
+            padding: 16px;
         }
-        #grid-container {
-            margin: 20px 0;
+
+        .app {
+            width: min(1060px, 96vw);
+            background: linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.01));
+            border: 1px solid rgba(107, 243, 255, 0.35);
+            border-radius: 18px;
+            box-shadow: 0 16px 50px rgba(0, 0, 0, 0.4), 0 0 28px rgba(107, 243, 255, 0.15);
+            padding: 18px;
+        }
+
+        h1 {
+            text-align: center;
+            margin: 0;
+            font-size: clamp(1.4rem, 2.8vw, 2.1rem);
+            letter-spacing: 1px;
+            text-shadow: 0 0 12px rgba(107, 243, 255, 0.4);
+        }
+
+        .subtitle {
+            margin: 8px auto 12px;
+            text-align: center;
+            color: #b8ccff;
+            max-width: 80ch;
+            font-size: 0.95rem;
+        }
+
+        .hud {
             display: flex;
+            flex-wrap: wrap;
             justify-content: center;
+            gap: 10px;
+            margin-bottom: 14px;
         }
-        table {
-            border-collapse: collapse;
+
+        button {
+            border: 1px solid rgba(107, 243, 255, 0.5);
+            background: rgba(8, 15, 36, 0.8);
+            color: var(--ink);
+            border-radius: 999px;
+            padding: 8px 12px;
+            cursor: pointer;
+            font-size: 0.9rem;
         }
+
+        button:hover { box-shadow: 0 0 12px rgba(107, 243, 255, 0.45); }
+
+        .layout {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 18px;
+        }
+
+        @media (min-width: 940px) {
+            .layout {
+                grid-template-columns: auto minmax(300px, 1fr);
+                align-items: start;
+            }
+        }
+
+        #grid-container {
+            background: var(--panel);
+            padding: 12px;
+            border-radius: 12px;
+            border: 1px solid rgba(255,255,255,.08);
+            overflow: auto;
+        }
+
+        table { border-collapse: collapse; }
+
         td {
-            width: 30px;
-            height: 30px;
-            border: 1px solid #000;
+            width: 35px;
+            height: 35px;
+            border: 1px solid rgba(255,255,255,0.12);
             position: relative;
+            background: #13224a;
         }
+
+        td.block { background: var(--block); }
+
         td input {
             width: 100%;
             height: 100%;
             border: none;
+            background: transparent;
+            color: var(--ink);
             text-align: center;
-            font-size: 18px;
-            background-color: transparent;
+            font-size: 1rem;
+            font-weight: 700;
             text-transform: uppercase;
             outline: none;
         }
-        td span {
+
+        td input:focus {
+            background: rgba(255, 107, 214, 0.17);
+            box-shadow: inset 0 0 0 2px rgba(255, 107, 214, 0.6);
+        }
+
+        td.correct { background: rgba(99, 255, 163, 0.2); }
+        td.incorrect { background: rgba(255, 107, 131, 0.28); }
+
+        td .number {
             position: absolute;
+            left: 3px;
             top: 2px;
-            left: 2px;
-            font-size: 10px;
+            font-size: 0.6rem;
+            color: #9fc1ff;
+            pointer-events: none;
         }
+
+        #status {
+            margin-top: 12px;
+            text-align: center;
+            font-size: 0.95rem;
+            color: #c8dcff;
+            min-height: 24px;
+        }
+
         #clues {
-            width: 80%;
-            margin: 0 auto;
+            background: var(--panel);
+            border: 1px solid rgba(255,255,255,.08);
+            border-radius: 12px;
+            padding: 12px;
+            max-height: 580px;
+            overflow: auto;
         }
-        #clues h2 {
-            margin-top: 20px;
-        }
-        #clues ol {
-            list-style-type: none;
-            padding-left: 0;
-        }
-        #clues li {
-            margin-bottom: 5px;
-        }
+
+        #clues h2 { margin: 6px 0; color: var(--accent); font-size: 1rem; }
+        #clues ol { margin: 6px 0 12px; padding-left: 22px; }
+        #clues li { margin-bottom: 6px; line-height: 1.25; }
     </style>
 </head>
 <body>
-    <h1 style="text-align:center;">Fantasy Crossword Puzzle</h1>
-    <div id="grid-container"></div>
-    <div id="clues"></div>
+    <main class="app">
+        <h1 id="title">Neon Rift Crossword</h1>
+        <p class="subtitle" id="subtitle"></p>
 
-    <!-- Load the script as a module -->
+        <div class="hud">
+            <button id="check-grid">Check Grid</button>
+            <button id="hint-letter">Hint Letter</button>
+            <button id="reveal-grid">Reveal</button>
+            <button id="new-puzzle">New Puzzle</button>
+        </div>
+
+        <div class="layout">
+            <div>
+                <div id="grid-container"></div>
+                <div id="status"></div>
+            </div>
+            <section id="clues"></section>
+        </div>
+    </main>
+
     <script type="module" src="script.js"></script>
 </body>
 </html>
